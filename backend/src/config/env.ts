@@ -4,6 +4,8 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   PORT: z.coerce.number().int().min(1).max(65535).default(4000),
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent']).default('info'),
+  DATABASE_URL: z.url({ protocol: /^postgres(ql)?$/ }),
+  UPLOAD_DIR: z.string().min(1),
 });
 
 export type Env = z.infer<typeof envSchema>;
@@ -16,4 +18,3 @@ if (!parsed.success) {
 }
 
 export const env: Env = parsed.data;
-export const isProduction = env.NODE_ENV === 'production';

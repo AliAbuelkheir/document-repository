@@ -123,6 +123,9 @@
   }
   body {
     @apply bg-background text-foreground;
+    background-image: url('/leaves.svg');
+    background-size: 480px;
+    background-attachment: fixed;
   }
   html {
     @apply font-sans;

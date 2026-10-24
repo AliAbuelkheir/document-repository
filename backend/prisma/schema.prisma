@@ -1,0 +1,153 @@
+// The Prisma client generates the ids (UUIDv7, time-ordered). The database does not.
+// The init migration SQL creates the extensions (citext, pg_trgm) and the
+// document_permissions CHECK constraint. This schema does not include them.
+
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  USER
+
+  @@map("user_role")
+}
+
+enum Visibility {
+  PUBLIC
+  RESTRICTED
+
+  @@map("document_visibility")
+}
+
+enum PermissionLevel {
+  VIEW
+  EDIT
+
+  @@map("permission_level")
+}
+
+model Department {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  name        String   @unique @db.Citext
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  users       UserDepartment[]
+  permissions DocumentPermission[]
+
+  @@map("departments")
+}
+
+model User {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  /// The service layer stores the email in lowercase.
+  email     String   @unique
+  name      String
+  /// bcrypt hash, never the plain password.
+  password  String
+  role      Role     @default(USER)
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  departments      UserDepartment[]
+  ownedDocuments   Document[]
+  uploadedVersions DocumentVersion[]
+  permissions      DocumentPermission[]
+
+  @@index([name(ops: raw("gin_trgm_ops"))], type: Gin, map: "users_name_trgm_idx")
+  @@index([email(ops: raw("gin_trgm_ops"))], type: Gin, map: "users_email_trgm_idx")
+  @@map("users")
+}
+
+model UserDepartment {
+  userId       String @map("user_id") @db.Uuid
+  departmentId String @map("department_id") @db.Uuid
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  department Department @relation(fields: [departmentId], references: [id], onDelete: Restrict)
+
+  @@id([userId, departmentId])
+  @@map("user_departments")
+}
+
+/// Catalog of default tags. Documents store tag names in documents.tags, not references.
+model Tag {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  name      String   @unique @db.Citext
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@map("tags")
+}
+
+model Document {
+  id               String     @id @default(uuid(7)) @db.Uuid
+  title            String
+  description      String?
+  ownerId          String     @map("owner_id") @db.Uuid
+  visibility       Visibility @default(PUBLIC)
+  tags             String[]   @default([])
+  /// Null only until the first version exists. One transaction inserts both rows.
+  currentVersionId String?    @unique @map("current_version_id") @db.Uuid
+  lastVersionAt    DateTime   @default(now()) @map("last_version_at") @db.Timestamptz(3)
+  deletedAt        DateTime?  @map("deleted_at") @db.Timestamptz(3)
+  createdAt        DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime   @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  owner          User                 @relation(fields: [ownerId], references: [id], onDelete: Restrict)
+  currentVersion DocumentVersion?     @relation("CurrentVersion", fields: [currentVersionId], references: [id], onDelete: SetNull)
+  versions       DocumentVersion[]    @relation("DocumentVersions")
+  permissions    DocumentPermission[]
+
+  @@index([tags], type: Gin)
+  @@map("documents")
+}
+
+model DocumentVersion {
+  id               String   @id @default(uuid(7)) @db.Uuid
+  documentId       String   @map("document_id") @db.Uuid
+  /// The storage keeps the file at `{documentId}/{versionNumber}` in UPLOAD_DIR.
+  versionNumber    Int      @map("version_number")
+  originalFilename String   @map("original_filename")
+  mimeType         String   @map("mime_type")
+  sizeBytes        Int      @map("size_bytes")
+  checksumSha256   String   @map("checksum_sha256") @db.Char(64)
+  changeNote       String?  @map("change_note")
+  uploadedById     String   @map("uploaded_by_id") @db.Uuid
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  document   Document  @relation("DocumentVersions", fields: [documentId], references: [id], onDelete: Cascade)
+  currentOf  Document? @relation("CurrentVersion")
+  uploadedBy User      @relation(fields: [uploadedById], references: [id], onDelete: Restrict)
+
+  @@unique([documentId, versionNumber])
+  @@map("document_versions")
+}
+
+model DocumentPermission {
+  id           String          @id @default(uuid(7)) @db.Uuid
+  documentId   String          @map("document_id") @db.Uuid
+  userId       String?         @map("user_id") @db.Uuid
+  departmentId String?         @map("department_id") @db.Uuid
+  level        PermissionLevel
+  createdAt    DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  document   Document    @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  user       User?       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  department Department? @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+
+  @@unique([documentId, userId])
+  @@unique([documentId, departmentId])
+  @@map("document_permissions")
+}

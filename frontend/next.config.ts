@@ -1,8 +1,9 @@
 import type { NextConfig } from 'next';
+import { z } from 'zod';
 
-// Rewrites are resolved at build time (and baked into the standalone output),
-// so BACKEND_URL must be set when running `next build` as well as at runtime.
-const backendUrl = process.env.BACKEND_URL ?? 'http://localhost:4000';
+// Next.js resolves rewrites at build time and keeps them in the standalone output.
+// Set BACKEND_URL for `next build` and also at runtime.
+const backendUrl = z.url().default('http://backend:4000').parse(process.env.BACKEND_URL);
 
 const nextConfig: NextConfig = {
   output: 'standalone',

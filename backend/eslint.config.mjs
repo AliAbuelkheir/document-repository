@@ -1,10 +1,9 @@
 import eslint from '@eslint/js';
-import prettier from 'eslint-config-prettier';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
-  { ignores: ['dist', 'node_modules', 'uploads'] },
+  { ignores: ['dist', 'node_modules', 'uploads', 'src/generated'] },
   eslint.configs.recommended,
   ...tseslint.configs.strictTypeChecked,
   {
@@ -26,5 +25,4 @@ export default tseslint.config(
     files: ['**/*.mjs'],
     ...tseslint.configs.disableTypeChecked,
   },
-  prettier,
 );

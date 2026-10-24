@@ -39,8 +39,13 @@ services:
       NODE_ENV: production
       PORT: 4000
       LOG_LEVEL: ${LOG_LEVEL:-info}
+      DATABASE_URL: "postgresql://${POSTGRES_USER:-docrepo}:${POSTGRES_PASSWORD:-docrepo}\
+        @postgres:5432/${POSTGRES_DB:-docrepo}"
+      UPLOAD_DIR: /app/uploads
     ports:
       - '${BACKEND_PORT:-4000}:4000'
+      # Prisma Studio, only while `npm run db:studio` runs in the container.
+      - '${STUDIO_PORT:-5555}:5555'
     volumes:
       - uploads:/app/uploads
     depends_on:
