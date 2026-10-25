@@ -1,3 +1,4 @@
+import cookieParser from 'cookie-parser';
 import express from 'express';
 import helmet from 'helmet';
 import { pinoHttp } from 'pino-http';
@@ -30,7 +31,13 @@ export function createApp(): express.Express {
       },
     }),
   );
-  app.use(helmet());
+  app.use(
+    helmet({
+      // The app runs on plain HTTP, so the browser must not change requests to HTTPS.
+      contentSecurityPolicy: { directives: { upgradeInsecureRequests: null } },
+    }),
+  );
+  app.use(cookieParser());
   app.use(express.json({ limit: '1mb' }));
 
   app.use('/api', apiRouter);

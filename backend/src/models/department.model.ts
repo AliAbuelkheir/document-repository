@@ -68,3 +68,11 @@ export async function update(
 export async function remove(id: string, db: DbClient = prisma): Promise<void> {
   await db.department.delete({ where: { id } });
 }
+
+export async function findByName(
+  name: string,
+  db: DbClient = prisma,
+): Promise<DepartmentRecord | null> {
+  const row = await db.department.findUnique({ where: { name }, include: withUserCount });
+  return row ? toRecord(row) : null;
+}

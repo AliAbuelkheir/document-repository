@@ -18,3 +18,12 @@ export interface ListResult<T> {
   items: T[];
   total: number;
 }
+
+/** The type of a value after `JSON.stringify` and `JSON.parse`: each `Date` becomes a string. */
+export type Json<T> = T extends Date
+  ? string
+  : T extends (infer Item)[]
+    ? Json<Item>[]
+    : T extends object
+      ? { [Key in keyof T]: Json<T[Key]> }
+      : T;

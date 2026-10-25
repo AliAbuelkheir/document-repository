@@ -7,8 +7,10 @@ import bcrypt from 'bcryptjs';
 
 import { env } from '../../src/config/env.js';
 import { prisma } from '../../src/config/prisma.js';
+import { redis } from '../../src/config/redis.js';
 import type { PermissionLevel, Role, Visibility } from '../../src/generated/prisma/enums.js';
 import type { NonEmptyArray } from '../../src/types/common.js';
+import { invalidateAll } from '../../src/utils/cache.js';
 import {
   ADMIN_EMAIL,
   SEED_PASSWORD,
@@ -431,6 +433,8 @@ async function main(): Promise<void> {
   const users = await seedUsers(departmentRows);
   const tagCount = await seedTags();
   const seed = await seedDocuments(uploadDir, departmentRows, users);
+  // The API caches data in Redis. Invalidate it, so that the API shows the new data.
+  await invalidateAll();
 
   console.log(
     `Seed created ${departmentRows.length} departments, ${users.length} users, ` +
@@ -445,4 +449,7 @@ main()
     console.error(error);
     process.exitCode = 1;
   })
-  .finally(() => prisma.$disconnect());
+  .finally(async () => {
+    await prisma.$disconnect();
+    redis.disconnect();
+  });

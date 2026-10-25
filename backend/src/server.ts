@@ -1,6 +1,8 @@
 import { createApp } from './app.js';
 import { env } from './config/env.js';
 import { logger } from './config/logger.js';
+import { prisma } from './config/prisma.js';
+import { redis } from './config/redis.js';
 
 const SHUTDOWN_TIMEOUT_MS = 10_000;
 
@@ -11,6 +13,10 @@ const server = app.listen(env.PORT, () => {
 });
 
 let shuttingDown = false;
+
+async function closeConnections(): Promise<void> {
+  await Promise.allSettled([prisma.$disconnect(), redis.quit()]);
+}
 
 function shutdown(signal: NodeJS.Signals): void {
   if (shuttingDown) return;
@@ -28,8 +34,10 @@ function shutdown(signal: NodeJS.Signals): void {
       logger.error({ err }, 'Error while closing HTTP server');
       process.exit(1);
     }
-    logger.info('Shutdown complete');
-    process.exit(0);
+    void closeConnections().then(() => {
+      logger.info('Shutdown complete');
+      process.exit(0);
+    });
   });
   server.closeIdleConnections();
 }

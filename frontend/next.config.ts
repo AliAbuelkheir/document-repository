@@ -8,8 +8,13 @@ const backendUrl = z.url().default('http://backend:4000').parse(process.env.BACK
 const nextConfig: NextConfig = {
   output: 'standalone',
   poweredByHeader: false,
+  skipTrailingSlashRedirect: true,
   cacheComponents: true,
   partialPrefetching: true,
+  experimental: {
+    // The proxy must accept uploads up to 25 MB, plus 1 MB for the other form fields.
+    proxyClientMaxBodySize: '26mb',
+  },
   turbopack: {
     rules: {
       '*.css': {

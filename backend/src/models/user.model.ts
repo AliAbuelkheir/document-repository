@@ -76,6 +76,11 @@ export async function findByEmailWithPassword(
   return { ...user, departmentIds: departments.map(({ departmentId }) => departmentId) };
 }
 
+export async function findIdByEmail(email: string, db: DbClient = prisma): Promise<string | null> {
+  const row = await db.user.findUnique({ where: { email }, select: { id: true } });
+  return row?.id ?? null;
+}
+
 export async function findActiveIds(ids: string[], db: DbClient = prisma): Promise<string[]> {
   const rows = await db.user.findMany({
     where: { id: { in: ids }, isActive: true },

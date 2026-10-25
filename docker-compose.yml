@@ -41,7 +41,9 @@ services:
       LOG_LEVEL: ${LOG_LEVEL:-info}
       DATABASE_URL: "postgresql://${POSTGRES_USER:-docrepo}:${POSTGRES_PASSWORD:-docrepo}\
         @postgres:5432/${POSTGRES_DB:-docrepo}"
+      REDIS_URL: redis://redis:6379
       UPLOAD_DIR: /app/uploads
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env (at least 32 characters)}
     ports:
       - '${BACKEND_PORT:-4000}:4000'
       # Prisma Studio, only while `npm run db:studio` runs in the container.
