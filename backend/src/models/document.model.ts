@@ -132,11 +132,13 @@ export async function search(
       )
     )`);
   }
+  // A document has one owner, so it matches any selected owner.
   if (filters.ownerIds?.length) {
     conditions.push(Prisma.sql`d.owner_id = ANY(${filters.ownerIds}::uuid[])`);
   }
+  // A document must have all the selected tags.
   if (filters.tags?.length) {
-    conditions.push(Prisma.sql`d.tags && ${filters.tags}::text[]`);
+    conditions.push(Prisma.sql`d.tags @> ${filters.tags}::text[]`);
   }
   if (term) {
     const pattern = containsPattern(term);

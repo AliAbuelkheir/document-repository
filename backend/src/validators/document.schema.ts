@@ -132,7 +132,9 @@ export const listDocumentsQuerySchema = z.strictObject({
     .meta({ description: 'Fuzzy match on title, description, file name, tags and owner' }),
   tags: repeatedParam(tagNameSchema)
     .optional()
-    .meta({ description: 'Repeat the parameter for more tags. A document matches any tag.' }),
+    .meta({
+      description: 'Repeat the parameter for more tags. A document must have all the tags.',
+    }),
   ownerIds: repeatedParam(idSchema)
     .optional()
     .meta({ description: 'Repeat the parameter for more owners. A document matches any owner.' }),
