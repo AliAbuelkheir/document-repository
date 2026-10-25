@@ -60,7 +60,7 @@ const columns = column.columns([
     header: 'Status',
     enableSorting: false,
     cell: (info) => (
-      <Badge variant={info.getValue() ? 'default' : 'outline'}>
+      <Badge variant={info.getValue() ? 'secondary' : 'outline'}>
         {info.getValue() ? 'Active' : 'Inactive'}
       </Badge>
     ),

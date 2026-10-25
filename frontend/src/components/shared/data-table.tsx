@@ -52,6 +52,8 @@ interface DataTableProps<TData extends { id: string }> {
   emptyMessage?: ReactNode;
   /** Classes for the scroll container of the table. */
   className?: string;
+  /** The ids of the columns that align to the right, for example numbers and row actions. */
+  rightAlignedColumnIds?: string[];
 }
 
 function SortIcon({ direction }: { direction: false | 'asc' | 'desc' }) {
@@ -101,6 +103,7 @@ export function DataTable<TData extends { id: string }>({
   onRowClick,
   emptyMessage = 'No results.',
   className,
+  rightAlignedColumnIds = [],
 }: DataTableProps<TData>) {
   const table = useTable({
     features: dataTableFeatures,
@@ -117,13 +120,17 @@ export function DataTable<TData extends { id: string }>({
 
   const rows = table.getRowModel().rows;
 
+  function alignClass(columnId: string): string | undefined {
+    return rightAlignedColumnIds.includes(columnId) ? 'text-right' : undefined;
+  }
+
   return (
     <Table containerClassName={className}>
       <TableHeader>
         {table.getHeaderGroups().map((headerGroup) => (
           <TableRow key={headerGroup.id}>
             {headerGroup.headers.map((header) => (
-              <TableHead key={header.id}>
+              <TableHead key={header.id} className={alignClass(header.column.id)}>
                 {!header.isPlaceholder && (
                   <SortableHeader
                     canSort={header.column.getCanSort()}
@@ -152,11 +159,11 @@ export function DataTable<TData extends { id: string }>({
         {rows.map((row) => (
           <TableRow
             key={row.id}
-            className={onRowClick ? 'cursor-pointer' : undefined}
+            className={onRowClick ? 'cursor-pointer hover:bg-selected' : undefined}
             onClick={onRowClick ? () => onRowClick(row.original) : undefined}
           >
             {row.getAllCells().map((cell) => (
-              <TableCell key={cell.id}>
+              <TableCell key={cell.id} className={alignClass(cell.column.id)}>
                 <table.FlexRender cell={cell} />
               </TableCell>
             ))}

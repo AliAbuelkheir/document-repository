@@ -136,6 +136,7 @@ export function DocumentsTable({
       onRowClick={(document) => router.push(`/documents/${document.id}`)}
       emptyMessage="No documents match the search and filters."
       className={className}
+      rightAlignedColumnIds={['size']}
     />
   );
 }

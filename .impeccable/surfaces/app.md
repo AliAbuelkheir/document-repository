@@ -25,7 +25,8 @@ Upload pill at the top right. Under it, one white panel: toolbar (pill search, T
 then the compact table filling the viewport height, pagination fixed at the panel foot.
 
 FORM: CRM record console. Signature interaction: the table scrolls inside its panel under a
-sticky header, so the toolbar and the pagination stay in view. seed: none (unavailable)
+sticky header, so the toolbar and the pagination stay in view. seed: none (roll skipped: the
+project owner pinned the brief, so no concept was rolled)
 
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the
 verdict, DESIGN.md, and every shipping raster carrying its provenance

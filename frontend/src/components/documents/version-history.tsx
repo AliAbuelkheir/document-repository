@@ -98,6 +98,7 @@ export function VersionHistory({
       columns={createColumns(currentVersionId, selectedVersionId)}
       data={versions}
       emptyMessage="No versions."
+      rightAlignedColumnIds={['sizeBytes', 'actions']}
     />
   );
 }

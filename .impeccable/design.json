@@ -1,0 +1,12 @@
+{
+  "colors": {
+    "ink": "#0F172A", "deepNavy": "#1A2744", "teal": "#14B8A6", "tealDark": "#0F766E",
+    "paper": "#F8F7F4", "line": "#E7E5E0", "white": "#FFFFFF", "slate": "#475569",
+    "inputBorder": "#8F8A82", "amber": "#F59E0B", "destructive": "#B91C1C"
+  },
+  "fonts": { "body": "Inter", "display": "Space Grotesk" },
+  "radius": { "control": "9999px", "field": "8px", "panel": "12px", "dialog": "16px" },
+  "controlHeight": "32px",
+  "tableRowHeight": "40px",
+  "sidebarWidth": "232px"
+}

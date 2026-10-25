@@ -11,7 +11,7 @@ import { SEARCH_DEBOUNCE_MS } from '@/lib/constants';
 /** A pill-shaped search field with a search icon. It has no logic of its own. */
 export function SearchBox(props: Omit<ComponentProps<'input'>, 'type' | 'className'>) {
   return (
-    <div className="relative w-full sm:max-w-sm">
+    <div className="relative w-full sm:max-w-md">
       <SearchIcon
         aria-hidden
         className={cn(

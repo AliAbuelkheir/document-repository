@@ -111,3 +111,16 @@
     text-underline-offset: 3px;
   }
 }
+
+/*
+ * The teal ring alone has 2.5:1 contrast on white. A teal dark line inside the ring makes the
+ * focus visible at more than 3:1 (WCAG 1.4.11). This rule is outside the layers, so it wins
+ * over `outline-none` on the components. Menu items and options show focus with a fill.
+ */
+:focus-visible:not([role='menuitem'], [role='option'], [role='dialog'], [role='tabpanel']) {
+  outline: 1px solid var(--primary);
+  outline-offset: 1px;
+}
+[data-surface='ink'] :focus-visible {
+  outline-color: var(--sidebar-ring);
+}

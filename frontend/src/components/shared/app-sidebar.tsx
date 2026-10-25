@@ -14,7 +14,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Dialog as DialogPrimitive } from 'radix-ui';
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 
 import logo from '@/app/icon.png';
 import {
@@ -61,9 +61,13 @@ function BrandLink({ onNavigate }: { onNavigate?: () => void }) {
   );
 }
 
-function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
-  const pathname = usePathname();
+interface NavListProps {
+  /** The path of the page. An empty path marks no item as current. */
+  pathname: string;
+  onNavigate?: () => void;
+}
 
+function NavList({ pathname, onNavigate }: NavListProps) {
   return (
     <nav aria-label="Main">
       <ul className="flex flex-col gap-0.5">
@@ -87,9 +91,7 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
                 {isCurrent && (
                   <span
                     aria-hidden
-                    className={cn(
-                      'absolute top-2 bottom-2 left-0 w-[3px] rounded-full bg-sidebar-primary',
-                    )}
+                    className="absolute inset-y-2 left-0 w-[3px] rounded-full bg-sidebar-primary"
                   />
                 )}
                 <Icon
@@ -105,6 +107,20 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
         })}
       </ul>
     </nav>
+  );
+}
+
+function CurrentNavList({ onNavigate }: { onNavigate?: () => void }) {
+  const pathname = usePathname();
+  return <NavList pathname={pathname} onNavigate={onNavigate} />;
+}
+
+/** The path is known only in the browser, so the server renders the links without a mark. */
+function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
+  return (
+    <Suspense fallback={<NavList pathname="" onNavigate={onNavigate} />}>
+      <CurrentNavList onNavigate={onNavigate} />
+    </Suspense>
   );
 }
 
@@ -183,6 +199,7 @@ function MobileBar() {
   return (
     <DialogPrimitive.Root open={isOpen} onOpenChange={setIsOpen}>
       <header
+        data-surface="ink"
         className={cn(
           'sticky top-0 z-40 flex h-14 items-center justify-between bg-sidebar px-4',
           'text-sidebar-foreground md:hidden',
@@ -205,6 +222,7 @@ function MobileBar() {
             'data-closed:animate-out data-closed:fade-out-0 md:hidden',
           )} />
         <DialogPrimitive.Content
+          data-surface="ink"
           className={cn(
             'fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] bg-sidebar text-sidebar-foreground',
             'shadow-[8px_0_32px_rgb(15_23_42/0.3)] duration-200 outline-none data-open:animate-in',
@@ -238,6 +256,7 @@ export function AppSidebar() {
     <>
       <MobileBar />
       <aside
+        data-surface="ink"
         className={cn(
           'sticky top-0 hidden h-dvh w-58 shrink-0 bg-sidebar text-sidebar-foreground md:block',
         )}>

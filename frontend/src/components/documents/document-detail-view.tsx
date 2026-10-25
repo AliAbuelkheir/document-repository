@@ -131,7 +131,7 @@ export function DocumentDetailView() {
         </Alert>
       )}
 
-      <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_19rem]">
+      <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_20rem]">
         <div className="min-w-0">
           {selectedVersion && (
             <DocumentPreview documentId={document.id} version={selectedVersion} />
@@ -184,7 +184,7 @@ function DocumentDetails({ document }: { document: DocumentDetail }) {
   const current = document.currentVersion;
 
   return (
-    <dl className="grid grid-cols-[6.5rem_minmax(0,1fr)] gap-x-3 gap-y-3 text-[13px]">
+    <dl className="grid grid-cols-[6rem_minmax(0,1fr)] gap-x-3 gap-y-3 text-[13px]">
       <dt className="text-muted-foreground">Owner</dt>
       <dd className="flex min-w-0 flex-col">
         <span className="font-medium">{document.owner.name}</span>
@@ -193,7 +193,9 @@ function DocumentDetails({ document }: { document: DocumentDetail }) {
       <dt className="text-muted-foreground">Current version</dt>
       <dd className="flex min-w-0 flex-col">
         <span className="font-medium tabular-nums">v{current.versionNumber}</span>
-        <span className="break-all text-muted-foreground">{current.originalFilename}</span>
+        <span className="truncate text-muted-foreground" title={current.originalFilename}>
+          {current.originalFilename}
+        </span>
         <span className="text-muted-foreground tabular-nums">{formatBytes(current.sizeBytes)}</span>
       </dd>
       <dt className="text-muted-foreground">Uploaded</dt>

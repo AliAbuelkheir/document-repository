@@ -45,7 +45,7 @@ const baseColumns = [
   column.accessor('isActive', {
     header: 'Status',
     cell: (info) => (
-      <Badge variant={info.getValue() ? 'default' : 'outline'}>
+      <Badge variant={info.getValue() ? 'secondary' : 'outline'}>
         {info.getValue() ? 'Active' : 'Deleted'}
       </Badge>
     ),
@@ -184,6 +184,7 @@ export function TagsTab() {
           sorting={sorting}
           onSortingChange={setSorting}
           emptyMessage="No tags match the search and filter."
+          rightAlignedColumnIds={['actions']}
           className="md:min-h-0 md:flex-1 md:overflow-auto"
         />
       )}
@@ -231,6 +232,7 @@ function AddTagForm() {
     >
       <Field data-invalid={errors.name !== undefined}>
         <Input
+          className="rounded-full"
           placeholder="New tag name"
           aria-label="New tag name"
           aria-invalid={errors.name !== undefined}

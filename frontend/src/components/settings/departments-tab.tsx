@@ -146,6 +146,7 @@ export function DepartmentsTab() {
           sorting={sorting}
           onSortingChange={setSorting}
           emptyMessage="No departments match the search."
+          rightAlignedColumnIds={['userCount', 'actions']}
           className="md:min-h-0 md:flex-1 md:overflow-auto"
         />
       )}
