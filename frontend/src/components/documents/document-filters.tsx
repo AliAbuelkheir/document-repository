@@ -14,8 +14,7 @@ interface DocumentFiltersProps {
 }
 
 export function DocumentFilters({ query, onChange }: DocumentFiltersProps) {
-  // Include inactive tags so users can find documents with old tags.
-  const tagsQuery = useTags();
+  const tagsQuery = useTags({ isActive: true });
   const tagOptions = (tagsQuery.data ?? []).map((tag) => ({ value: tag.name, label: tag.name }));
   const filterCount =
     Number(Boolean(query.search)) + query.tags.length +

@@ -189,15 +189,12 @@ function DocumentDetails({ document }: { document: DocumentDetail }) {
         <span className="font-medium">{document.owner.name}</span>
         <span className="truncate text-muted-foreground">{document.owner.email}</span>
       </dd>
-      <dt className="text-muted-foreground">Latest version</dt>
+      <dt className="text-muted-foreground">Version</dt>
       <dd className="flex min-w-0 flex-col">
-        <span className="font-medium tabular-nums">Version: {current.versionNumber}</span>
-        <span className="truncate text-muted-foreground" title={current.originalFilename}>
-          {current.originalFilename}
-        </span>
+        <span className="font-medium tabular-nums">{current.versionNumber}</span>
         <span className="text-muted-foreground tabular-nums">{formatBytes(current.sizeBytes)}</span>
       </dd>
-      <dt className="text-muted-foreground">Uploaded</dt>
+      <dt className="text-muted-foreground">Updated</dt>
       <dd className="flex flex-col">
         <span>{current.uploadedBy.name}</span>
         <span className="text-muted-foreground tabular-nums">
@@ -210,7 +207,7 @@ function DocumentDetails({ document }: { document: DocumentDetail }) {
           <dd className="break-words">{current.changeNote}</dd>
         </>
       )}
-      <dt className="text-muted-foreground">Created</dt>
+      <dt className="text-muted-foreground">Uploaded at</dt>
       <dd className="tabular-nums">{formatDateTime(document.createdAt)}</dd>
     </dl>
   );
