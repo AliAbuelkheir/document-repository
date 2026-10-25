@@ -11,27 +11,17 @@ import type { DocumentVersion } from '@/types/document';
 
 const column = createDataTableColumns<DocumentVersion>();
 
-function createColumns(currentVersionId: string, selectedVersionId: string) {
+function createColumns(selectedVersionId: string) {
   return column.columns([
     column.accessor('versionNumber', {
       header: 'Version',
       cell: (info) => (
         <span className="flex items-center gap-2">
           <span className="font-medium tabular-nums">v{info.getValue()}</span>
-          {info.row.original.id === currentVersionId && <Badge>Current</Badge>}
-          {info.row.original.id === selectedVersionId && <Badge variant="outline">Shown</Badge>}
+          {info.row.original.id === selectedVersionId && <Badge>Current</Badge>}
         </span>
       ),
     }),
-    column.accessor('originalFilename', {
-      header: 'File',
-      cell: (info) => (
-        <span className="block max-w-64 truncate" title={info.getValue()}>
-          {info.getValue()}
-        </span>
-      ),
-    }),
-    column.accessor((version) => version.uploadedBy.name, { id: 'uploadedBy', header: 'Uploader' }),
     column.accessor('createdAt', {
       header: 'Date',
       cell: (info) => (
@@ -83,19 +73,17 @@ function createColumns(currentVersionId: string, selectedVersionId: string) {
 
 interface VersionHistoryProps {
   versions: DocumentVersion[];
-  currentVersionId: string;
   selectedVersionId: string;
 }
 
 /** All versions of a document, newest first (the API order). */
 export function VersionHistory({
   versions,
-  currentVersionId,
   selectedVersionId,
 }: VersionHistoryProps) {
   return (
     <DataTable
-      columns={createColumns(currentVersionId, selectedVersionId)}
+      columns={createColumns(selectedVersionId)}
       data={versions}
       emptyMessage="No versions."
       rightAlignedColumnIds={['sizeBytes', 'actions']}

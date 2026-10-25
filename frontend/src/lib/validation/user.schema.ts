@@ -44,7 +44,15 @@ export type EditUserFormValues = z.infer<typeof editUserFormSchema>;
 
 // ---- The query string of the users tab ----
 
-const userSortSchema = z.enum(['relevance', 'name', 'email', 'department', 'role', 'createdAt']);
+const userSortSchema = z.enum([
+  'relevance',
+  'name',
+  'email',
+  'department',
+  'role',
+  'isActive',
+  'createdAt',
+]);
 
 export const userStatusSchema = z.enum(['active', 'inactive']);
 

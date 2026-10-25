@@ -2,7 +2,8 @@ import type { Role } from '../generated/prisma/enums.js';
 
 import type { NamedRef, SortOrder } from './common.js';
 
-export type UserSortField = 'relevance' | 'name' | 'email' | 'department' | 'role' | 'createdAt';
+export type UserSortField =
+  'relevance' | 'name' | 'email' | 'department' | 'role' | 'isActive' | 'createdAt';
 
 export interface UserSearchFilters {
   search?: string;

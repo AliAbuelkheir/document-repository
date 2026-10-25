@@ -112,11 +112,11 @@ export function DocumentDetailView() {
           <Alert variant="warning">
             <HistoryIcon />
             <AlertTitle>
-              Viewing v{selectedVersion.versionNumber} of {document.currentVersion.versionNumber} -
-              not the current version
+              Preview: version {selectedVersion.versionNumber} of
+              {' '}{document.currentVersion.versionNumber} - an older version
             </AlertTitle>
             <AlertDescription>
-              <Link href={`/documents/${document.id}`}>Show the current version</Link>
+              <Link href={`/documents/${document.id}`}>Show the latest version</Link>
             </AlertDescription>
           </Alert>
         )}
@@ -126,7 +126,7 @@ export function DocumentDetailView() {
           <CircleAlertIcon />
           <AlertTitle>Version {versionNumber} does not exist</AlertTitle>
           <AlertDescription>
-            <Link href={`/documents/${document.id}`}>Show the current version</Link>
+            <Link href={`/documents/${document.id}`}>Show the latest version</Link>
           </AlertDescription>
         </Alert>
       )}
@@ -170,7 +170,6 @@ export function DocumentDetailView() {
         {versionsQuery.isSuccess && (
           <VersionHistory
             versions={versionsQuery.data}
-            currentVersionId={document.currentVersion.id}
             selectedVersionId={selectedVersion?.id ?? ''}
           />
         )}
@@ -190,9 +189,9 @@ function DocumentDetails({ document }: { document: DocumentDetail }) {
         <span className="font-medium">{document.owner.name}</span>
         <span className="truncate text-muted-foreground">{document.owner.email}</span>
       </dd>
-      <dt className="text-muted-foreground">Current version</dt>
+      <dt className="text-muted-foreground">Latest version</dt>
       <dd className="flex min-w-0 flex-col">
-        <span className="font-medium tabular-nums">v{current.versionNumber}</span>
+        <span className="font-medium tabular-nums">Version: {current.versionNumber}</span>
         <span className="truncate text-muted-foreground" title={current.originalFilename}>
           {current.originalFilename}
         </span>
@@ -222,7 +221,7 @@ interface DocumentHeaderProps {
   selectedVersion: VersionFile | undefined;
 }
 
-/** The title, the description, the tags and the actions of a document. */
+/** The title, the tags and the actions of a document. */
 function DocumentHeader({ document, selectedVersion }: DocumentHeaderProps) {
   const router = useRouter();
   const [openDialog, setOpenDialog] = useState<OpenDialog>('none');
@@ -285,12 +284,6 @@ function DocumentHeader({ document, selectedVersion }: DocumentHeaderProps) {
   return (
     <div className="flex flex-col gap-3">
       <PageHeader title={document.title} actions={actions} />
-
-      {document.description && (
-        <p className="max-w-[72ch] text-sm whitespace-pre-wrap text-muted-foreground">
-          {document.description}
-        </p>
-      )}
 
       {document.tags.length > 0 && (
         <div className="flex flex-wrap gap-1">

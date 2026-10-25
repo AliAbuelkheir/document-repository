@@ -140,6 +140,11 @@ export async function search(
   if (filters.tags?.length) {
     conditions.push(Prisma.sql`d.tags @> ${filters.tags}::text[]`);
   }
+  if (filters.fileTypes?.length) {
+    conditions.push(Prisma.sql`
+      lower(split_part(v.original_filename, '.', -1)) = ANY(${filters.fileTypes}::text[])
+    `);
+  }
   if (term) {
     const pattern = containsPattern(term);
     conditions.push(Prisma.sql`(

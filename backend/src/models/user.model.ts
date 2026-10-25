@@ -160,6 +160,7 @@ export async function search(
       JOIN departments d ON d.id = ud.department_id WHERE ud.user_id = u.id
     )`,
     role: Prisma.sql`u.role`,
+    isActive: Prisma.sql`u.is_active`,
     createdAt: Prisma.sql`u.created_at`,
   };
   const sortField = filters.sort === 'relevance' ? 'name' : filters.sort;

@@ -16,7 +16,8 @@ export interface User extends UserListItem {
   updatedAt: string;
 }
 
-export type UserSortField = 'relevance' | 'name' | 'email' | 'department' | 'role' | 'createdAt';
+export type UserSortField =
+  'relevance' | 'name' | 'email' | 'department' | 'role' | 'isActive' | 'createdAt';
 
 export interface UserListParams {
   search?: string;

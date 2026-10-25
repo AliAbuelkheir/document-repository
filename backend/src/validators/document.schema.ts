@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { registry, signedIn } from '../docs/openapi.js';
+import { ALLOWED_EXTENSIONS } from '../utils/file-types.js';
 import {
   dataResponse,
   dateTimeSchema,
@@ -138,6 +139,11 @@ export const listDocumentsQuerySchema = z.strictObject({
   ownerIds: repeatedParam(idSchema)
     .optional()
     .meta({ description: 'Repeat the parameter for more owners. A document matches any owner.' }),
+  fileTypes: repeatedParam(z.enum(ALLOWED_EXTENSIONS))
+    .optional()
+    .meta({
+      description: 'Repeat for more extensions. The latest file must match any selected type.',
+    }),
   sort: z
     .enum(['relevance', 'lastVersionAt', 'title', 'owner', 'size', 'createdAt'])
     .optional()

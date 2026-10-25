@@ -6,20 +6,14 @@ import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 
 import { createDataTableColumns, DataTable } from '@/components/shared/data-table';
+import { FilterSelect } from '@/components/shared/filter-select';
 import { MultiSelect } from '@/components/shared/multi-select';
 import { PaginationBar } from '@/components/shared/pagination-bar';
 import { QueryError } from '@/components/shared/query-error';
-import { SearchInput } from '@/components/shared/search-input';
+import { SearchToolbar } from '@/components/shared/search-toolbar';
 import { TableSkeleton } from '@/components/shared/table-skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { useIsAdmin } from '@/hooks/use-auth';
 import { useDepartments } from '@/hooks/use-departments';
 import { useUpdateSearchParams } from '@/hooks/use-update-search-params';
@@ -58,7 +52,7 @@ const columns = column.columns([
   }),
   column.accessor('isActive', {
     header: 'Status',
-    enableSorting: false,
+    sortDescFirst: true,
     cell: (info) => (
       <Badge variant={info.getValue() ? 'secondary' : 'outline'}>
         {info.getValue() ? 'Active' : 'Inactive'}
@@ -143,50 +137,54 @@ export function UsersTab() {
 
   return (
     <>
-      <div className="flex flex-wrap items-center gap-2 border-b p-3">
-        <SearchInput
+      <div className="border-b p-4">
+        <SearchToolbar
           value={query.search ?? ''}
-          onChange={(search) => changeFilters({ search })}
-          placeholder="Search name or email"
-        />
-        <MultiSelect
-          label="Departments"
-          options={departmentOptions}
-          selected={query.departmentIds}
-          onChange={(departmentIds) => changeFilters({ departmentIds })}
-        />
-        <Select
-          value={query.role ?? ALL}
-          onValueChange={(value) => changeSelectFilter('role', value)}
+          onSearch={(search) => changeFilters({ search })}
+          placeholder="Search users by name or email"
+          filterCount={
+            Number(Boolean(query.search)) + query.departmentIds.length +
+            Number(Boolean(query.role)) + Number(Boolean(query.status))
+          }
+          onClear={() => changeFilters({
+            search: undefined,
+            departmentIds: undefined,
+            role: undefined,
+            status: undefined,
+          })}
+          actions={isAdmin && (
+            <Button className="rounded-md" onClick={() => setDialog({ mode: 'create' })}>
+              <PlusIcon />
+              Add user
+            </Button>
+          )}
         >
-          <SelectTrigger aria-label="Role">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={ALL}>All roles</SelectItem>
-            <SelectItem value="ADMIN">Admin</SelectItem>
-            <SelectItem value="USER">User</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select
-          value={query.status ?? ALL}
-          onValueChange={(value) => changeSelectFilter('status', value)}
-        >
-          <SelectTrigger aria-label="Status">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={ALL}>All statuses</SelectItem>
-            <SelectItem value="active">Active</SelectItem>
-            <SelectItem value="inactive">Inactive</SelectItem>
-          </SelectContent>
-        </Select>
-        {isAdmin && (
-          <Button className="ml-auto" onClick={() => setDialog({ mode: 'create' })}>
-            <PlusIcon />
-            Add user
-          </Button>
-        )}
+          <MultiSelect
+            isFilter
+            label="Departments"
+            options={departmentOptions}
+            selected={query.departmentIds}
+            onChange={(departmentIds) => changeFilters({ departmentIds })}
+          />
+          <FilterSelect
+            label="Role"
+            value={query.role ?? ALL}
+            onChange={(value) => changeSelectFilter('role', value)}
+            options={[
+              { value: 'ADMIN', label: 'Admin' },
+              { value: 'USER', label: 'User' },
+            ]}
+          />
+          <FilterSelect
+            label="Status"
+            value={query.status ?? ALL}
+            onChange={(value) => changeSelectFilter('status', value)}
+            options={[
+              { value: 'active', label: 'Active' },
+              { value: 'inactive', label: 'Inactive' },
+            ]}
+          />
+        </SearchToolbar>
       </div>
 
       {usersQuery.isError && (

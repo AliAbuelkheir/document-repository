@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import { ConfirmDialog } from '@/components/shared/confirm-dialog';
 import { createDataTableColumns, DataTable } from '@/components/shared/data-table';
 import { QueryError } from '@/components/shared/query-error';
-import { SearchBox } from '@/components/shared/search-input';
+import { SearchToolbar } from '@/components/shared/search-toolbar';
 import { TableSkeleton } from '@/components/shared/table-skeleton';
 import { Button } from '@/components/ui/button';
 import { useIsAdmin } from '@/hooks/use-auth';
@@ -115,19 +115,20 @@ export function DepartmentsTab() {
 
   return (
     <>
-      <div className="flex flex-wrap items-center gap-2 border-b p-3">
-        <SearchBox
+      <div className="border-b p-4">
+        <SearchToolbar
           value={search}
-          onChange={(event) => setSearch(event.target.value)}
-          placeholder="Search departments"
-          aria-label="Search departments"
+          onSearch={setSearch}
+          placeholder="Search departments by name or description"
+          filterCount={Number(Boolean(search))}
+          onClear={() => setSearch('')}
+          actions={isAdmin && (
+            <Button className="rounded-md" onClick={() => setDialog({ mode: 'create' })}>
+              <PlusIcon />
+              Add department
+            </Button>
+          )}
         />
-        {isAdmin && (
-          <Button className="ml-auto" onClick={() => setDialog({ mode: 'create' })}>
-            <PlusIcon />
-            Add department
-          </Button>
-        )}
       </div>
 
       {departmentsQuery.isError && (

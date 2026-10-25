@@ -158,6 +158,7 @@ export async function listDocuments(
     search: query.search,
     tags,
     ownerIds: query.ownerIds,
+    fileTypes: query.fileTypes,
     sort,
     order: query.order ?? defaultOrder(sort),
   };

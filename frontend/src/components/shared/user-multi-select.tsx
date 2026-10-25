@@ -1,6 +1,6 @@
 'use client';
 
-import { CheckIcon, ChevronsUpDownIcon } from 'lucide-react';
+import { CheckIcon, ChevronDownIcon } from 'lucide-react';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -18,7 +18,6 @@ import { useUserPicker, useUsersByIds } from '@/hooks/use-users';
 import { SEARCH_DEBOUNCE_MS } from '@/lib/constants';
 
 import { LoadMoreSentinel } from './load-more-sentinel';
-import { ACTIVE_TRIGGER_CLASS, SelectedCount } from './multi-select';
 import { UserPickerStatus } from './user-picker-status';
 
 interface UserMultiSelectProps {
@@ -33,12 +32,14 @@ export function UserMultiSelect({ label, selectedIds, onChange }: UserMultiSelec
     <Popover>
       <PopoverTrigger asChild>
         <Button
-          variant="outline"
-          className={selectedIds.length > 0 ? ACTIVE_TRIGGER_CLASS : undefined}
+          variant={selectedIds.length > 0 ? 'default' : 'outline'}
+          className="h-8 gap-2 rounded-md px-3 text-xs shadow-none"
         >
           {label}
-          {selectedIds.length > 0 && <SelectedCount count={selectedIds.length} />}
-          <ChevronsUpDownIcon />
+          <span className="font-normal">
+            {selectedIds.length > 0 ? `${selectedIds.length} selected` : 'All'}
+          </span>
+          <ChevronDownIcon className="size-3" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="p-0" align="start">

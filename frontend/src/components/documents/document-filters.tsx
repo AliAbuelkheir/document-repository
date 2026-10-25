@@ -1,11 +1,11 @@
 'use client';
 
 import { MultiSelect } from '@/components/shared/multi-select';
-import { SearchInput } from '@/components/shared/search-input';
+import { SearchToolbar } from '@/components/shared/search-toolbar';
 import { UserMultiSelect } from '@/components/shared/user-multi-select';
-import { Button } from '@/components/ui/button';
 import { useTags } from '@/hooks/use-tags';
 import type { SearchParamUpdates } from '@/hooks/use-update-search-params';
+import { ALLOWED_EXTENSIONS } from '@/lib/constants';
 import type { DocumentListQuery } from '@/lib/validation/document.schema';
 
 interface DocumentFiltersProps {
@@ -14,40 +14,47 @@ interface DocumentFiltersProps {
 }
 
 export function DocumentFilters({ query, onChange }: DocumentFiltersProps) {
-  // All default tags, also the inactive ones, so documents with an old tag can still be found.
+  // Include inactive tags so users can find documents with old tags.
   const tagsQuery = useTags();
   const tagOptions = (tagsQuery.data ?? []).map((tag) => ({ value: tag.name, label: tag.name }));
-  const hasFilters =
-    (query.search ?? '') !== '' || query.tags.length > 0 || query.ownerIds.length > 0;
-
-  function clearFilters() {
-    onChange({ search: undefined, tags: undefined, ownerIds: undefined });
-  }
+  const filterCount =
+    Number(Boolean(query.search)) + query.tags.length +
+    query.ownerIds.length + query.fileTypes.length;
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <SearchInput
-        value={query.search ?? ''}
-        onChange={(search) => onChange({ search })}
-        placeholder="Search documents"
-      />
+    <SearchToolbar
+      value={query.search ?? ''}
+      onSearch={(search) => onChange({ search })}
+      placeholder="Search title, description, file name, tags or owner"
+      filterCount={filterCount}
+      onClear={() => onChange({
+        search: undefined,
+        tags: undefined,
+        ownerIds: undefined,
+        fileTypes: undefined,
+      })}
+    >
       <MultiSelect
+        isFilter
         label="Tags"
         heading="Documents must have all the selected tags"
         options={tagOptions}
         selected={query.tags}
         onChange={(tags) => onChange({ tags })}
       />
+      <MultiSelect
+        isFilter
+        label="File type"
+        heading="Match any selected type of the latest file"
+        options={ALLOWED_EXTENSIONS.map((type) => ({ value: type, label: type.toUpperCase() }))}
+        selected={query.fileTypes}
+        onChange={(fileTypes) => onChange({ fileTypes })}
+      />
       <UserMultiSelect
         label="Uploader"
         selectedIds={query.ownerIds}
         onChange={(ownerIds) => onChange({ ownerIds })}
       />
-      {hasFilters && (
-        <Button variant="ghost" onClick={clearFilters}>
-          Clear filters
-        </Button>
-      )}
-    </div>
+    </SearchToolbar>
   );
 }

@@ -9,20 +9,14 @@ import { z } from 'zod';
 
 import { ConfirmDialog } from '@/components/shared/confirm-dialog';
 import { createDataTableColumns, DataTable } from '@/components/shared/data-table';
+import { FilterSelect } from '@/components/shared/filter-select';
 import { QueryError } from '@/components/shared/query-error';
-import { SearchBox } from '@/components/shared/search-input';
+import { SearchToolbar } from '@/components/shared/search-toolbar';
 import { TableSkeleton } from '@/components/shared/table-skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Field, FieldError } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { useIsAdmin } from '@/hooks/use-auth';
 import { useCreateTag, useSetTagActive, useTags } from '@/hooks/use-tags';
 import { showFormError, toastError } from '@/lib/api-errors';
@@ -148,27 +142,28 @@ export function TagsTab() {
 
   return (
     <>
-      <div className="flex flex-wrap items-start gap-2 border-b p-3">
-        <SearchBox
+      <div className="border-b p-4">
+        <SearchToolbar
           value={search}
-          onChange={(event) => setSearch(event.target.value)}
-          placeholder="Search tags"
-          aria-label="Search tags"
-        />
-        <Select
-          value={status}
-          onValueChange={(value) => setStatus(statusFilterSchema.parse(value))}
+          onSearch={setSearch}
+          placeholder="Search tags by name"
+          filterCount={Number(Boolean(search)) + Number(status !== 'all')}
+          onClear={() => {
+            setSearch('');
+            setStatus('all');
+          }}
+          actions={isAdmin && <AddTagForm />}
         >
-          <SelectTrigger aria-label="Status">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All statuses</SelectItem>
-            <SelectItem value="active">Active</SelectItem>
-            <SelectItem value="inactive">Deleted</SelectItem>
-          </SelectContent>
-        </Select>
-        {isAdmin && <AddTagForm />}
+          <FilterSelect
+            label="Status"
+            value={status}
+            onChange={(value) => setStatus(statusFilterSchema.parse(value))}
+            options={[
+              { value: 'active', label: 'Active' },
+              { value: 'inactive', label: 'Deleted' },
+            ]}
+          />
+        </SearchToolbar>
       </div>
 
       {tagsQuery.isError && (
@@ -228,11 +223,11 @@ function AddTagForm() {
     <form
       noValidate
       onSubmit={form.handleSubmit(handleSubmit)}
-      className="ml-auto flex items-start gap-2"
+      className="flex items-start gap-2"
     >
       <Field data-invalid={errors.name !== undefined}>
         <Input
-          className="rounded-full"
+          className="rounded-md"
           placeholder="New tag name"
           aria-label="New tag name"
           aria-invalid={errors.name !== undefined}
@@ -240,7 +235,7 @@ function AddTagForm() {
         />
         <FieldError errors={[errors.name]} />
       </Field>
-      <Button type="submit" disabled={createMutation.isPending}>
+      <Button type="submit" className="rounded-md" disabled={createMutation.isPending}>
         Add tag
       </Button>
     </form>

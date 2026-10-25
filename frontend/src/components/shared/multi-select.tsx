@@ -1,6 +1,6 @@
 'use client';
 
-import { CheckIcon, ChevronsUpDownIcon } from 'lucide-react';
+import { CheckIcon, ChevronDownIcon, ChevronsUpDownIcon } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -24,6 +24,7 @@ interface MultiSelectProps {
   selected: string[];
   onChange: (selected: string[]) => void;
   isInvalid?: boolean;
+  isFilter?: boolean;
   /** A short text above the choices, for example how the selected choices combine. */
   heading?: string;
 }
@@ -47,8 +48,21 @@ export function MultiSelect({
   selected,
   onChange,
   isInvalid = false,
+  isFilter = false,
   heading,
 }: MultiSelectProps) {
+  let selectionLabel = 'All';
+  if (selected.length === 1) {
+    const selectedOption = options.find((option) => option.value === selected[0]);
+    selectionLabel = selectedOption?.label ?? selected[0] ?? 'All';
+  } else if (selected.length > 1) {
+    selectionLabel = `${selected.length} selected`;
+  }
+  let triggerClass = selected.length > 0 ? ACTIVE_TRIGGER_CLASS : undefined;
+  if (isFilter) {
+    triggerClass = 'h-8 gap-2 rounded-md px-3 text-xs shadow-none';
+  }
+
   function toggle(value: string) {
     if (selected.includes(value)) {
       onChange(selected.filter((item) => item !== value));
@@ -61,13 +75,22 @@ export function MultiSelect({
     <Popover>
       <PopoverTrigger asChild>
         <Button
-          variant="outline"
+          variant={isFilter && selected.length > 0 ? 'default' : 'outline'}
           aria-invalid={isInvalid}
-          className={selected.length > 0 ? ACTIVE_TRIGGER_CLASS : undefined}
+          className={triggerClass}
         >
           {label}
-          {selected.length > 0 && <SelectedCount count={selected.length} />}
-          <ChevronsUpDownIcon />
+          {isFilter ? (
+            <>
+              <span className="max-w-40 truncate font-normal">{selectionLabel}</span>
+              <ChevronDownIcon className="size-3" />
+            </>
+          ) : (
+            <>
+              {selected.length > 0 && <SelectedCount count={selected.length} />}
+              <ChevronsUpDownIcon />
+            </>
+          )}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="p-0" align="start">

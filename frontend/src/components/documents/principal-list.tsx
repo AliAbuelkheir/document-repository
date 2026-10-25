@@ -3,6 +3,7 @@
 import { cn } from 'cn';
 import { UserIcon, UsersIcon, XIcon } from 'lucide-react';
 
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import type { Principal } from '@/types/document';
 
@@ -11,13 +12,6 @@ interface PrincipalListProps {
   /** Without `onRemove`, the list is read-only. */
   onRemove?: (principal: Principal) => void;
   emptyMessage: string;
-}
-
-export function principalLabel(principal: Principal): string {
-  if (principal.type === 'DEPARTMENT') {
-    return `${principal.name} (department)`;
-  }
-  return principal.name;
 }
 
 /** The viewers or the editors of a document. */
@@ -41,7 +35,8 @@ export function PrincipalList({ principals, onRemove, emptyMessage }: PrincipalL
               <UserIcon className="size-3.5" />
             )}
           </span>
-          <span className="min-w-0 flex-1 truncate">{principalLabel(principal)}</span>
+          <span className="min-w-0 truncate">{principal.name}</span>
+          {principal.type === 'DEPARTMENT' && <Badge variant="secondary">Department</Badge>}
           {onRemove && (
             <Button
               type="button"

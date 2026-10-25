@@ -27,6 +27,7 @@ function toListParams(query: DocumentListQuery): DocumentListParams {
     search: query.search === '' ? undefined : query.search,
     tags: query.tags,
     ownerIds: query.ownerIds,
+    fileTypes: query.fileTypes,
     sort: query.sort,
     order: query.order,
     page: query.page,
@@ -86,7 +87,7 @@ export function DocumentListView() {
         title="Documents"
         description={documentCountText(documentsQuery.data?.meta.total)}
         actions={
-          <Button onClick={() => setIsUploadOpen(true)}>
+          <Button className="rounded-md" onClick={() => setIsUploadOpen(true)}>
             <UploadIcon />
             Upload
           </Button>
@@ -98,7 +99,7 @@ export function DocumentListView() {
         className={cn(
           'flex flex-col overflow-hidden rounded-xl border bg-card md:min-h-0 md:flex-1',
         )}>
-        <div className="border-b p-3">
+        <div className="border-b p-4">
           <DocumentFilters query={query} onChange={changeFilters} />
         </div>
         {documentsQuery.isError && (

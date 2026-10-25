@@ -77,6 +77,7 @@ export interface DocumentListParams {
   search?: string;
   tags?: string[];
   ownerIds?: string[];
+  fileTypes?: string[];
   sort?: DocumentSortField;
   order?: SortOrder;
   page: number;

@@ -71,7 +71,7 @@ export const listUsersQuerySchema = z.strictObject({
   role: roleSchema.optional(),
   isActive: z.stringbool().optional(),
   sort: z
-    .enum(['relevance', 'name', 'email', 'department', 'role', 'createdAt'])
+    .enum(['relevance', 'name', 'email', 'department', 'role', 'isActive', 'createdAt'])
     .optional()
     .meta({ description: 'Default: relevance with `search`, else name' }),
   order: sortOrderSchema.optional().meta({ description: 'Default: asc (desc for createdAt)' }),
