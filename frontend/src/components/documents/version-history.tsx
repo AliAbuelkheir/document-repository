@@ -17,39 +17,59 @@ function createColumns(currentVersionId: string, selectedVersionId: string) {
       header: 'Version',
       cell: (info) => (
         <span className="flex items-center gap-2">
-          v{info.getValue()}
+          <span className="font-medium tabular-nums">v{info.getValue()}</span>
           {info.row.original.id === currentVersionId && <Badge>Current</Badge>}
           {info.row.original.id === selectedVersionId && <Badge variant="outline">Shown</Badge>}
         </span>
       ),
     }),
-    column.accessor('originalFilename', { header: 'File' }),
+    column.accessor('originalFilename', {
+      header: 'File',
+      cell: (info) => (
+        <span className="block max-w-64 truncate" title={info.getValue()}>
+          {info.getValue()}
+        </span>
+      ),
+    }),
     column.accessor((version) => version.uploadedBy.name, { id: 'uploadedBy', header: 'Uploader' }),
     column.accessor('createdAt', {
       header: 'Date',
-      cell: (info) => formatDateTime(info.getValue()),
+      cell: (info) => (
+        <span className="text-muted-foreground tabular-nums">
+          {formatDateTime(info.getValue())}
+        </span>
+      ),
     }),
     column.accessor('changeNote', {
       header: 'Note',
-      cell: (info) => info.getValue() ?? '',
+      cell: (info) => (
+        <span
+          className="block max-w-64 truncate text-muted-foreground"
+          title={info.getValue() ?? ''}
+        >
+          {info.getValue() ?? ''}
+        </span>
+      ),
     }),
     column.accessor('sizeBytes', {
       header: 'Size',
-      cell: (info) => formatBytes(info.getValue()),
+      cell: (info) => (
+        <span className="text-muted-foreground tabular-nums">{formatBytes(info.getValue())}</span>
+      ),
     }),
     column.display({
       id: 'actions',
-      header: 'Actions',
+      header: () => <span className="sr-only">Actions</span>,
       cell: (info) => {
         const version = info.row.original;
         return (
-          <div className="flex gap-1">
-            <Button variant="outline" size="sm" asChild>
+          <div className="flex justify-end gap-1">
+            <Button variant="ghost" size="sm" asChild>
               <Link href={`/documents/${version.documentId}?version=${version.versionNumber}`}>
                 View
               </Link>
             </Button>
-            <Button variant="outline" size="sm" asChild>
+            <Button variant="ghost" size="sm" asChild>
               <a href={versionContentUrl(version.documentId, version.id, 'attachment')} download>
                 Download
               </a>

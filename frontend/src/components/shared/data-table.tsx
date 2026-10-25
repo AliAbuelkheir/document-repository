@@ -1,5 +1,6 @@
 'use client';
 
+import { cn } from 'cn';
 import {
   createColumnHelper,
   createSortedRowModel,
@@ -12,7 +13,7 @@ import {
   useTable,
 } from '@tanstack/react-table';
 import type { ColumnDef, SortingState, Updater } from '@tanstack/react-table';
-import { ArrowDownIcon, ArrowUpIcon } from 'lucide-react';
+import { ArrowDownIcon, ArrowUpDownIcon, ArrowUpIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 import {
@@ -49,6 +50,8 @@ interface DataTableProps<TData extends { id: string }> {
   manualSorting?: boolean;
   onRowClick?: (row: TData) => void;
   emptyMessage?: ReactNode;
+  /** Classes for the scroll container of the table. */
+  className?: string;
 }
 
 function SortIcon({ direction }: { direction: false | 'asc' | 'desc' }) {
@@ -58,7 +61,7 @@ function SortIcon({ direction }: { direction: false | 'asc' | 'desc' }) {
   if (direction === 'desc') {
     return <ArrowDownIcon aria-label="sorted descending" />;
   }
-  return null;
+  return <ArrowUpDownIcon aria-hidden className="opacity-0 group-hover/sort:opacity-100" />;
 }
 
 interface SortableHeaderProps {
@@ -74,7 +77,15 @@ function SortableHeader({ canSort, direction, onToggle, children }: SortableHead
     return children;
   }
   return (
-    <button type="button" className="inline-flex items-center gap-1" onClick={onToggle}>
+    <button
+      type="button"
+      className={cn(
+        'group/sort -mx-1.5 inline-flex h-7 items-center gap-1 rounded-md px-1.5 outline-none',
+        'hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring [&_svg]:size-3.5',
+        '[&_svg]:text-primary',
+      )}
+      onClick={onToggle}
+    >
       {children}
       <SortIcon direction={direction} />
     </button>
@@ -89,6 +100,7 @@ export function DataTable<TData extends { id: string }>({
   manualSorting = false,
   onRowClick,
   emptyMessage = 'No results.',
+  className,
 }: DataTableProps<TData>) {
   const table = useTable({
     features: dataTableFeatures,
@@ -106,7 +118,7 @@ export function DataTable<TData extends { id: string }>({
   const rows = table.getRowModel().rows;
 
   return (
-    <Table>
+    <Table containerClassName={className}>
       <TableHeader>
         {table.getHeaderGroups().map((headerGroup) => (
           <TableRow key={headerGroup.id}>
@@ -129,7 +141,10 @@ export function DataTable<TData extends { id: string }>({
       <TableBody>
         {rows.length === 0 && (
           <TableRow>
-            <TableCell colSpan={columns.length} className="text-center text-muted-foreground">
+            <TableCell
+              colSpan={columns.length}
+              className="h-32 text-center text-sm whitespace-normal text-muted-foreground"
+            >
               {emptyMessage}
             </TableCell>
           </TableRow>

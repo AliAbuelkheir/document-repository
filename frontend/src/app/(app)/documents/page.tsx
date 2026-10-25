@@ -4,7 +4,7 @@ import { Suspense } from 'react';
 import { DocumentListView } from '@/components/documents/document-list-view';
 
 export const metadata: Metadata = {
-  title: 'Documents - Document Repository',
+  title: 'Documents - EEMW Documents',
 };
 
 export default function DocumentsPage() {

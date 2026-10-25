@@ -28,6 +28,18 @@ interface MultiSelectProps {
   heading?: string;
 }
 
+/** The look of a dropdown trigger that has selected choices. */
+export const ACTIVE_TRIGGER_CLASS = 'border-primary/30 bg-selected text-primary hover:bg-selected';
+
+/** The number of selected choices, in a small teal bubble. */
+export function SelectedCount({ count }: { count: number }) {
+  return (
+    <span className="rounded-full bg-primary px-1.5 text-[11px] leading-4 text-primary-foreground">
+      {count}
+    </span>
+  );
+}
+
 /** A dropdown with a search box and many choices. The search runs in the browser (cmdk). */
 export function MultiSelect({
   label,
@@ -48,9 +60,13 @@ export function MultiSelect({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" aria-invalid={isInvalid}>
+        <Button
+          variant="outline"
+          aria-invalid={isInvalid}
+          className={selected.length > 0 ? ACTIVE_TRIGGER_CLASS : undefined}
+        >
           {label}
-          {selected.length > 0 && ` (${selected.length})`}
+          {selected.length > 0 && <SelectedCount count={selected.length} />}
           <ChevronsUpDownIcon />
         </Button>
       </PopoverTrigger>

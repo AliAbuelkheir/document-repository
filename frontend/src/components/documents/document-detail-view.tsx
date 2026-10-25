@@ -1,8 +1,11 @@
 'use client';
 
+import { cn } from 'cn';
 import {
-  ArrowLeftIcon,
+  ChevronLeftIcon,
+  CircleAlertIcon,
   DownloadIcon,
+  HistoryIcon,
   PencilIcon,
   ShieldIcon,
   Trash2Icon,
@@ -14,7 +17,9 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 
 import { ConfirmDialog } from '@/components/shared/confirm-dialog';
+import { PageHeader } from '@/components/shared/page-header';
 import { QueryError } from '@/components/shared/query-error';
+import { TableSkeleton } from '@/components/shared/table-skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -51,13 +56,27 @@ function findSelectedVersion(
 function NotFoundMessage() {
   return (
     <Alert>
+      <CircleAlertIcon />
       <AlertTitle>Not found or you do not have access</AlertTitle>
       <AlertDescription>
-        <Link href="/documents" className="underline">
-          Go back to the documents
-        </Link>
+        <Link href="/documents">Go back to the documents</Link>
       </AlertDescription>
     </Alert>
+  );
+}
+
+function BackLink() {
+  return (
+    <Link
+      href="/documents"
+      className={cn(
+        '-mb-2 flex w-fit items-center gap-1 rounded-md text-sm text-muted-foreground outline-none',
+        'hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring',
+      )}
+    >
+      <ChevronLeftIcon className="size-4" />
+      Documents
+    </Link>
   );
 }
 
@@ -69,7 +88,7 @@ export function DocumentDetailView() {
   const versionsQuery = useDocumentVersions(documentId);
 
   if (documentQuery.isPending) {
-    return <p className="text-muted-foreground">Loading the document...</p>;
+    return <p className="text-sm text-muted-foreground">Loading the document...</p>;
   }
   if (documentQuery.isError) {
     // The API gives 404 also when the user cannot read the document.
@@ -83,74 +102,116 @@ export function DocumentDetailView() {
   const selectedVersion = findSelectedVersion(document, versionsQuery.data, versionNumber);
 
   return (
-    <>
-      <Link href="/documents" className="flex items-center gap-1 text-sm hover:underline">
-        <ArrowLeftIcon className="size-4" />
-        Documents
-      </Link>
+    <div className="flex flex-col gap-5">
+      <BackLink />
 
       <DocumentHeader document={document} selectedVersion={selectedVersion} />
 
       {selectedVersion &&
         selectedVersion.versionNumber !== document.currentVersion.versionNumber && (
-          <Alert>
+          <Alert variant="warning">
+            <HistoryIcon />
             <AlertTitle>
               Viewing v{selectedVersion.versionNumber} of {document.currentVersion.versionNumber} -
               not the current version
             </AlertTitle>
             <AlertDescription>
-              <Link href={`/documents/${document.id}`} className="underline">
-                Show the current version
-              </Link>
+              <Link href={`/documents/${document.id}`}>Show the current version</Link>
             </AlertDescription>
           </Alert>
         )}
 
       {selectedVersion === undefined && versionsQuery.isSuccess && (
         <Alert variant="destructive">
+          <CircleAlertIcon />
           <AlertTitle>Version {versionNumber} does not exist</AlertTitle>
           <AlertDescription>
-            <Link href={`/documents/${document.id}`} className="underline">
-              Show the current version
-            </Link>
+            <Link href={`/documents/${document.id}`}>Show the current version</Link>
           </AlertDescription>
         </Alert>
       )}
 
-      {selectedVersion && <DocumentPreview documentId={document.id} version={selectedVersion} />}
-
-      <div className="grid gap-4 lg:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle>Access</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <AccessSummary document={document} />
-          </CardContent>
-        </Card>
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Version history</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {versionsQuery.isPending && <p className="text-muted-foreground">Loading...</p>}
-            {versionsQuery.isError && (
-              <QueryError
-                error={versionsQuery.error}
-                onRetry={() => void versionsQuery.refetch()}
-              />
-            )}
-            {versionsQuery.isSuccess && (
-              <VersionHistory
-                versions={versionsQuery.data}
-                currentVersionId={document.currentVersion.id}
-                selectedVersionId={selectedVersion?.id ?? ''}
-              />
-            )}
-          </CardContent>
-        </Card>
+      <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_19rem]">
+        <div className="min-w-0">
+          {selectedVersion && (
+            <DocumentPreview documentId={document.id} version={selectedVersion} />
+          )}
+        </div>
+        <div className="flex flex-col gap-5">
+          <Card>
+            <CardHeader className="border-b">
+              <CardTitle>Details</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <DocumentDetails document={document} />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="border-b">
+              <CardTitle>Access</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <AccessSummary document={document} />
+            </CardContent>
+          </Card>
+        </div>
       </div>
-    </>
+
+      <Card className="gap-0 pb-0">
+        <CardHeader className="border-b">
+          <CardTitle>Version history</CardTitle>
+        </CardHeader>
+        {versionsQuery.isPending && <TableSkeleton />}
+        {versionsQuery.isError && (
+          <CardContent className="py-4">
+            <QueryError error={versionsQuery.error} onRetry={() => void versionsQuery.refetch()} />
+          </CardContent>
+        )}
+        {versionsQuery.isSuccess && (
+          <VersionHistory
+            versions={versionsQuery.data}
+            currentVersionId={document.currentVersion.id}
+            selectedVersionId={selectedVersion?.id ?? ''}
+          />
+        )}
+      </Card>
+    </div>
+  );
+}
+
+/** The owner, the current version and the dates of a document. */
+function DocumentDetails({ document }: { document: DocumentDetail }) {
+  const current = document.currentVersion;
+
+  return (
+    <dl className="grid grid-cols-[6.5rem_minmax(0,1fr)] gap-x-3 gap-y-3 text-[13px]">
+      <dt className="text-muted-foreground">Owner</dt>
+      <dd className="flex min-w-0 flex-col">
+        <span className="font-medium">{document.owner.name}</span>
+        <span className="truncate text-muted-foreground">{document.owner.email}</span>
+      </dd>
+      <dt className="text-muted-foreground">Current version</dt>
+      <dd className="flex min-w-0 flex-col">
+        <span className="font-medium tabular-nums">v{current.versionNumber}</span>
+        <span className="break-all text-muted-foreground">{current.originalFilename}</span>
+        <span className="text-muted-foreground tabular-nums">{formatBytes(current.sizeBytes)}</span>
+      </dd>
+      <dt className="text-muted-foreground">Uploaded</dt>
+      <dd className="flex flex-col">
+        <span>{current.uploadedBy.name}</span>
+        <span className="text-muted-foreground tabular-nums">
+          {formatDateTime(current.createdAt)}
+        </span>
+      </dd>
+      {current.changeNote && (
+        <>
+          <dt className="text-muted-foreground">Change note</dt>
+          <dd className="break-words">{current.changeNote}</dd>
+        </>
+      )}
+      <dt className="text-muted-foreground">Created</dt>
+      <dd className="tabular-nums">{formatDateTime(document.createdAt)}</dd>
+    </dl>
   );
 }
 
@@ -159,12 +220,11 @@ interface DocumentHeaderProps {
   selectedVersion: VersionFile | undefined;
 }
 
-/** The title, the details and the actions of a document. */
+/** The title, the description, the tags and the actions of a document. */
 function DocumentHeader({ document, selectedVersion }: DocumentHeaderProps) {
   const router = useRouter();
   const [openDialog, setOpenDialog] = useState<OpenDialog>('none');
   const deleteMutation = useDeleteDocument();
-  const current = document.currentVersion;
 
   function setDialogOpen(dialog: OpenDialog, open: boolean) {
     setOpenDialog(open ? dialog : 'none');
@@ -183,80 +243,62 @@ function DocumentHeader({ document, selectedVersion }: DocumentHeaderProps) {
     });
   }
 
+  const actions = (
+    <>
+      {selectedVersion && (
+        <Button asChild>
+          <a href={versionContentUrl(document.id, selectedVersion.id, 'attachment')} download>
+            <DownloadIcon />
+            Download v{selectedVersion.versionNumber}
+          </a>
+        </Button>
+      )}
+      {document.canWrite && (
+        <>
+          <Button variant="outline" onClick={() => setOpenDialog('newVersion')}>
+            <UploadIcon />
+            Upload new version
+          </Button>
+          <Button variant="outline" onClick={() => setOpenDialog('edit')}>
+            <PencilIcon />
+            Edit details
+          </Button>
+        </>
+      )}
+      {document.canManage && (
+        <>
+          <Button variant="outline" onClick={() => setOpenDialog('access')}>
+            <ShieldIcon />
+            Access
+          </Button>
+          <Button variant="destructive" onClick={() => setOpenDialog('delete')}>
+            <Trash2Icon />
+            Delete
+          </Button>
+        </>
+      )}
+    </>
+  );
+
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex flex-wrap items-start justify-between gap-2">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-semibold">{document.title}</h1>
-          {document.description && (
-            <p className="whitespace-pre-wrap text-muted-foreground">{document.description}</p>
-          )}
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {selectedVersion && (
-            <Button asChild>
-              <a href={versionContentUrl(document.id, selectedVersion.id, 'attachment')} download>
-                <DownloadIcon />
-                Download v{selectedVersion.versionNumber}
-              </a>
-            </Button>
-          )}
-          {document.canWrite && (
-            <>
-              <Button variant="outline" onClick={() => setOpenDialog('newVersion')}>
-                <UploadIcon />
-                Upload new version
-              </Button>
-              <Button variant="outline" onClick={() => setOpenDialog('edit')}>
-                <PencilIcon />
-                Edit details
-              </Button>
-            </>
-          )}
-          {document.canManage && (
-            <>
-              <Button variant="outline" onClick={() => setOpenDialog('access')}>
-                <ShieldIcon />
-                Access
-              </Button>
-              <Button variant="destructive" onClick={() => setOpenDialog('delete')}>
-                <Trash2Icon />
-                Delete
-              </Button>
-            </>
-          )}
-        </div>
-      </div>
+      <PageHeader title={document.title} actions={actions} />
 
-      <div className="flex flex-wrap gap-1">
-        {document.tags.map((tag) => (
-          <Badge key={tag} variant="secondary">
-            {tag}
-          </Badge>
-        ))}
-      </div>
+      {document.description && (
+        <p className="max-w-[72ch] text-sm whitespace-pre-wrap text-muted-foreground">
+          {document.description}
+        </p>
+      )}
 
-      <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
-        <dt className="text-muted-foreground">Owner</dt>
-        <dd>
-          {document.owner.name} ({document.owner.email})
-        </dd>
-        <dt className="text-muted-foreground">Visibility</dt>
-        <dd>{document.visibility === 'PUBLIC' ? 'Public' : 'Restricted'}</dd>
-        <dt className="text-muted-foreground">Current version</dt>
-        <dd>
-          v{current.versionNumber}: {current.originalFilename} ({formatBytes(current.sizeBytes)}),
-          uploaded by {current.uploadedBy.name} on {formatDateTime(current.createdAt)}
-        </dd>
-        {current.changeNote && (
-          <>
-            <dt className="text-muted-foreground">Change note</dt>
-            <dd>{current.changeNote}</dd>
-          </>
-        )}
-        <dt className="text-muted-foreground">Created</dt>
-        <dd>{formatDateTime(document.createdAt)}</dd>
-      </dl>
+      {document.tags.length > 0 && (
+        <div className="flex flex-wrap gap-1">
+          {document.tags.map((tag) => (
+            <Badge key={tag} variant="secondary">
+              {tag}
+            </Badge>
+          ))}
+        </div>
+      )}
 
       <NewVersionDialog
         documentId={document.id}

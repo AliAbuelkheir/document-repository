@@ -18,6 +18,7 @@ import { useUserPicker, useUsersByIds } from '@/hooks/use-users';
 import { SEARCH_DEBOUNCE_MS } from '@/lib/constants';
 
 import { LoadMoreSentinel } from './load-more-sentinel';
+import { ACTIVE_TRIGGER_CLASS, SelectedCount } from './multi-select';
 import { UserPickerStatus } from './user-picker-status';
 
 interface UserMultiSelectProps {
@@ -31,9 +32,12 @@ export function UserMultiSelect({ label, selectedIds, onChange }: UserMultiSelec
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline">
+        <Button
+          variant="outline"
+          className={selectedIds.length > 0 ? ACTIVE_TRIGGER_CLASS : undefined}
+        >
           {label}
-          {selectedIds.length > 0 && ` (${selectedIds.length})`}
+          {selectedIds.length > 0 && <SelectedCount count={selectedIds.length} />}
           <ChevronsUpDownIcon />
         </Button>
       </PopoverTrigger>

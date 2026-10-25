@@ -4,7 +4,7 @@ import { Suspense } from 'react';
 import { LoginForm } from '@/components/auth/login-form';
 
 export const metadata: Metadata = {
-  title: 'Log in - Document Repository',
+  title: 'Log in - EEMW Documents',
 };
 
 export default function LoginPage() {

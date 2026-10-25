@@ -10,6 +10,7 @@ import { MultiSelect } from '@/components/shared/multi-select';
 import { PaginationBar } from '@/components/shared/pagination-bar';
 import { QueryError } from '@/components/shared/query-error';
 import { SearchInput } from '@/components/shared/search-input';
+import { TableSkeleton } from '@/components/shared/table-skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -39,18 +40,27 @@ const column = createDataTableColumns<UserListItem>();
 
 // The column ids of the sortable columns are the `sort` values of the API.
 const columns = column.columns([
-  column.accessor('name', { header: 'Name' }),
-  column.accessor('email', { header: 'Email' }),
+  column.accessor('name', {
+    header: 'Name',
+    cell: (info) => <span className="font-medium">{info.getValue()}</span>,
+  }),
+  column.accessor('email', {
+    header: 'Email',
+    cell: (info) => <span className="text-muted-foreground">{info.getValue()}</span>,
+  }),
   column.accessor((user) => user.departments.map((department) => department.name).join(', '), {
     id: 'department',
     header: 'Departments',
   }),
-  column.accessor('role', { header: 'Role' }),
+  column.accessor('role', {
+    header: 'Role',
+    cell: (info) => (info.getValue() === 'ADMIN' ? 'Admin' : 'User'),
+  }),
   column.accessor('isActive', {
     header: 'Status',
     enableSorting: false,
     cell: (info) => (
-      <Badge variant={info.getValue() ? 'secondary' : 'outline'}>
+      <Badge variant={info.getValue() ? 'default' : 'outline'}>
         {info.getValue() ? 'Active' : 'Inactive'}
       </Badge>
     ),
@@ -58,7 +68,9 @@ const columns = column.columns([
   column.accessor('createdAt', {
     header: 'Created',
     sortDescFirst: true,
-    cell: (info) => formatDateTime(info.getValue()),
+    cell: (info) => (
+      <span className="text-muted-foreground tabular-nums">{formatDateTime(info.getValue())}</span>
+    ),
   }),
 ]);
 
@@ -131,7 +143,7 @@ export function UsersTab() {
 
   return (
     <>
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2 border-b p-3">
         <SearchInput
           value={query.search ?? ''}
           onChange={(search) => changeFilters({ search })}
@@ -178,9 +190,11 @@ export function UsersTab() {
       </div>
 
       {usersQuery.isError && (
-        <QueryError error={usersQuery.error} onRetry={() => void usersQuery.refetch()} />
+        <div className="p-3">
+          <QueryError error={usersQuery.error} onRetry={() => void usersQuery.refetch()} />
+        </div>
       )}
-      {usersQuery.isPending && <p className="text-muted-foreground">Loading users...</p>}
+      {usersQuery.isPending && <TableSkeleton />}
       {usersQuery.isSuccess && (
         <>
           <DataTable
@@ -191,12 +205,15 @@ export function UsersTab() {
             manualSorting
             onRowClick={(user) => setDialog({ mode: 'details', userId: user.id })}
             emptyMessage="No users match the search and filters."
+            className="md:min-h-0 md:flex-1 md:overflow-auto"
           />
-          <PaginationBar
-            meta={usersQuery.data.meta}
-            onPageChange={(page) => updateSearchParams({ page: String(page) })}
-            onPageSizeChange={(pageSize) => changeFilters({ pageSize: String(pageSize) })}
-          />
+          <div className="border-t px-3 py-2">
+            <PaginationBar
+              meta={usersQuery.data.meta}
+              onPageChange={(page) => updateSearchParams({ page: String(page) })}
+              onPageSizeChange={(pageSize) => changeFilters({ pageSize: String(pageSize) })}
+            />
+          </div>
         </>
       )}
 

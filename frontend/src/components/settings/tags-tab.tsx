@@ -10,6 +10,8 @@ import { z } from 'zod';
 import { ConfirmDialog } from '@/components/shared/confirm-dialog';
 import { createDataTableColumns, DataTable } from '@/components/shared/data-table';
 import { QueryError } from '@/components/shared/query-error';
+import { SearchBox } from '@/components/shared/search-input';
+import { TableSkeleton } from '@/components/shared/table-skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Field, FieldError } from '@/components/ui/field';
@@ -36,11 +38,14 @@ type StatusFilter = z.infer<typeof statusFilterSchema>;
 const column = createDataTableColumns<Tag>();
 
 const baseColumns = [
-  column.accessor('name', { header: 'Name' }),
+  column.accessor('name', {
+    header: 'Name',
+    cell: (info) => <span className="font-medium">{info.getValue()}</span>,
+  }),
   column.accessor('isActive', {
     header: 'Status',
     cell: (info) => (
-      <Badge variant={info.getValue() ? 'secondary' : 'outline'}>
+      <Badge variant={info.getValue() ? 'default' : 'outline'}>
         {info.getValue() ? 'Active' : 'Deleted'}
       </Badge>
     ),
@@ -48,7 +53,9 @@ const baseColumns = [
   column.accessor('createdAt', {
     header: 'Created',
     sortDescFirst: true,
-    cell: (info) => formatDateTime(info.getValue()),
+    cell: (info) => (
+      <span className="text-muted-foreground tabular-nums">{formatDateTime(info.getValue())}</span>
+    ),
   }),
 ];
 
@@ -66,14 +73,15 @@ function createColumns(actions: TagActions | undefined) {
     ...baseColumns,
     column.display({
       id: 'actions',
-      header: 'Actions',
+      header: () => <span className="sr-only">Actions</span>,
       cell: (info) => {
         const tag = info.row.original;
         if (tag.isActive) {
           return (
             <Button
-              variant="destructive"
+              variant="ghost"
               size="sm"
+              className="text-destructive hover:bg-destructive/5 hover:text-destructive"
               disabled={actions.isPending}
               onClick={() => actions.onDelete(tag)}
             >
@@ -83,7 +91,7 @@ function createColumns(actions: TagActions | undefined) {
         }
         return (
           <Button
-            variant="outline"
+            variant="ghost"
             size="sm"
             disabled={actions.isPending}
             onClick={() => actions.onRestore(tag)}
@@ -140,14 +148,12 @@ export function TagsTab() {
 
   return (
     <>
-      <div className="flex flex-wrap items-start gap-2">
-        <Input
-          type="search"
+      <div className="flex flex-wrap items-start gap-2 border-b p-3">
+        <SearchBox
           value={search}
           onChange={(event) => setSearch(event.target.value)}
           placeholder="Search tags"
           aria-label="Search tags"
-          className="max-w-sm"
         />
         <Select
           value={status}
@@ -166,9 +172,11 @@ export function TagsTab() {
       </div>
 
       {tagsQuery.isError && (
-        <QueryError error={tagsQuery.error} onRetry={() => void tagsQuery.refetch()} />
+        <div className="p-3">
+          <QueryError error={tagsQuery.error} onRetry={() => void tagsQuery.refetch()} />
+        </div>
       )}
-      {tagsQuery.isPending && <p className="text-muted-foreground">Loading...</p>}
+      {tagsQuery.isPending && <TableSkeleton />}
       {tagsQuery.isSuccess && (
         <DataTable
           columns={createColumns(actions)}
@@ -176,6 +184,7 @@ export function TagsTab() {
           sorting={sorting}
           onSortingChange={setSorting}
           emptyMessage="No tags match the search and filter."
+          className="md:min-h-0 md:flex-1 md:overflow-auto"
         />
       )}
 
