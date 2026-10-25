@@ -29,7 +29,7 @@ export function DocumentFilters({ query, onChange }: DocumentFiltersProps) {
       <SearchInput
         value={query.search ?? ''}
         onChange={(search) => onChange({ search })}
-        placeholder="Search title, description, file name, tags or uploader"
+        placeholder="Search documents"
       />
       <MultiSelect
         label="Tags"

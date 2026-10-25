@@ -1,6 +1,7 @@
 'use client';
 
-import { XIcon } from 'lucide-react';
+import { cn } from 'cn';
+import { UserIcon, UsersIcon, XIcon } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import type { Principal } from '@/types/document';
@@ -26,10 +27,21 @@ export function PrincipalList({ principals, onRemove, emptyMessage }: PrincipalL
   }
 
   return (
-    <ul className="flex flex-col gap-1 text-sm">
+    <ul className="flex flex-col gap-1.5 text-[13px]">
       {principals.map((principal) => (
-        <li key={`${principal.type}:${principal.id}`} className="flex items-center gap-2">
-          <span>{principalLabel(principal)}</span>
+        <li key={`${principal.type}:${principal.id}`} className="flex min-h-7 items-center gap-2">
+          <span
+            className={cn(
+              'flex size-6 shrink-0 items-center justify-center rounded-full bg-muted',
+              'text-muted-foreground ring-1 ring-border',
+            )}>
+            {principal.type === 'DEPARTMENT' ? (
+              <UsersIcon className="size-3.5" />
+            ) : (
+              <UserIcon className="size-3.5" />
+            )}
+          </span>
+          <span className="min-w-0 flex-1 truncate">{principalLabel(principal)}</span>
           {onRemove && (
             <Button
               type="button"

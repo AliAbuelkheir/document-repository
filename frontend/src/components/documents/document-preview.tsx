@@ -1,5 +1,7 @@
 'use client';
 
+import { cn } from 'cn';
+import { FileIcon } from 'lucide-react';
 import Image from 'next/image';
 
 import { PREVIEW_MIME_TYPES } from '@/lib/constants';
@@ -20,7 +22,7 @@ export function DocumentPreview({ documentId, version }: DocumentPreviewProps) {
       <iframe
         src={url}
         title={`Preview of ${version.originalFilename}`}
-        className="h-[75vh] w-full rounded-lg border bg-white"
+        className="h-[75vh] min-h-96 w-full rounded-xl border bg-card"
       />
     );
   }
@@ -35,14 +37,19 @@ export function DocumentPreview({ documentId, version }: DocumentPreviewProps) {
         sizes="100vw"
         // The API sends the file. Next.js must not change the image.
         unoptimized
-        className="h-auto max-h-[75vh] w-auto max-w-full rounded-lg border"
+        className="h-auto max-h-[75vh] w-auto max-w-full rounded-xl border bg-card"
       />
     );
   }
 
   return (
-    <p className="rounded-lg border p-6 text-center text-sm text-muted-foreground">
-      Preview is not available for this file type. Download the file to open it.
-    </p>
+    <div
+      className={cn(
+        'flex flex-col items-center gap-2 rounded-xl border bg-card px-6 py-16 text-center text-sm',
+      )}>
+      <FileIcon aria-hidden className="size-8 text-muted-foreground" />
+      <p className="font-medium">Preview is not available for this file type.</p>
+      <p className="text-muted-foreground">Download the file to open it.</p>
+    </div>
   );
 }

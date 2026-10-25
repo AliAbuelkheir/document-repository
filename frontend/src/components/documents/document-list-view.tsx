@@ -1,12 +1,15 @@
 'use client';
 
+import { cn } from 'cn';
 import type { SortingState } from '@tanstack/react-table';
 import { UploadIcon } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 
+import { PageHeader } from '@/components/shared/page-header';
 import { PaginationBar } from '@/components/shared/pagination-bar';
 import { QueryError } from '@/components/shared/query-error';
+import { TableSkeleton } from '@/components/shared/table-skeleton';
 import { Button } from '@/components/ui/button';
 import { useDocuments } from '@/hooks/use-documents';
 import { useUpdateSearchParams } from '@/hooks/use-update-search-params';
@@ -43,6 +46,18 @@ function toSorting(query: DocumentListQuery): SortingState {
   return [{ id: 'lastVersionAt', desc: true }];
 }
 
+/** For example "24 documents". Empty while the list loads. */
+function documentCountText(total: number | undefined): string {
+  if (total === undefined) {
+    // A no-break space keeps the height of the line, so the page does not move.
+    return ' ';
+  }
+  if (total === 1) {
+    return '1 document';
+  }
+  return `${total} documents`;
+}
+
 /** The documents screen. The search, filters, sort and page are in the URL query string. */
 export function DocumentListView() {
   const searchParams = useSearchParams();
@@ -66,37 +81,55 @@ export function DocumentListView() {
   }
 
   return (
-    <>
-      <div className="flex items-center justify-between gap-2">
-        <h1 className="text-xl font-semibold">Documents</h1>
-        <Button onClick={() => setIsUploadOpen(true)}>
-          <UploadIcon />
-          Upload
-        </Button>
-      </div>
+    <div className="flex flex-1 flex-col gap-5 md:min-h-0">
+      <PageHeader
+        title="Documents"
+        description={documentCountText(documentsQuery.data?.meta.total)}
+        actions={
+          <Button onClick={() => setIsUploadOpen(true)}>
+            <UploadIcon />
+            Upload
+          </Button>
+        }
+      />
 
-      <DocumentFilters query={query} onChange={changeFilters} />
-
-      {documentsQuery.isError && (
-        <QueryError error={documentsQuery.error} onRetry={() => void documentsQuery.refetch()} />
-      )}
-      {documentsQuery.isPending && <p className="text-muted-foreground">Loading documents...</p>}
-      {documentsQuery.isSuccess && (
-        <>
-          <DocumentsTable
-            documents={documentsQuery.data.data}
-            sorting={toSorting(query)}
-            onSortingChange={changeSorting}
-          />
-          <PaginationBar
-            meta={documentsQuery.data.meta}
-            onPageChange={(page) => updateSearchParams({ page: String(page) })}
-            onPageSizeChange={(pageSize) => changeFilters({ pageSize: String(pageSize) })}
-          />
-        </>
-      )}
+      {/* On desktop, the panel fills the page height and the table scrolls inside it. */}
+      <section
+        className={cn(
+          'flex flex-col overflow-hidden rounded-xl border bg-card md:min-h-0 md:flex-1',
+        )}>
+        <div className="border-b p-3">
+          <DocumentFilters query={query} onChange={changeFilters} />
+        </div>
+        {documentsQuery.isError && (
+          <div className="p-3">
+            <QueryError
+              error={documentsQuery.error}
+              onRetry={() => void documentsQuery.refetch()}
+            />
+          </div>
+        )}
+        {documentsQuery.isPending && <TableSkeleton />}
+        {documentsQuery.isSuccess && (
+          <>
+            <DocumentsTable
+              documents={documentsQuery.data.data}
+              sorting={toSorting(query)}
+              onSortingChange={changeSorting}
+              className="md:min-h-0 md:flex-1 md:overflow-auto"
+            />
+            <div className="border-t px-3 py-2">
+              <PaginationBar
+                meta={documentsQuery.data.meta}
+                onPageChange={(page) => updateSearchParams({ page: String(page) })}
+                onPageSizeChange={(pageSize) => changeFilters({ pageSize: String(pageSize) })}
+              />
+            </div>
+          </>
+        )}
+      </section>
 
       <UploadDocumentDialog open={isUploadOpen} onOpenChange={setIsUploadOpen} />
-    </>
+    </div>
   );
 }

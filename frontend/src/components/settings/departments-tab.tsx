@@ -8,8 +8,9 @@ import { toast } from 'sonner';
 import { ConfirmDialog } from '@/components/shared/confirm-dialog';
 import { createDataTableColumns, DataTable } from '@/components/shared/data-table';
 import { QueryError } from '@/components/shared/query-error';
+import { SearchBox } from '@/components/shared/search-input';
+import { TableSkeleton } from '@/components/shared/table-skeleton';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { useIsAdmin } from '@/hooks/use-auth';
 import { useDeleteDepartment, useDepartments } from '@/hooks/use-departments';
 import { toastError } from '@/lib/api-errors';
@@ -21,13 +22,24 @@ import type { DepartmentDialogState } from './department-dialog';
 const column = createDataTableColumns<Department>();
 
 const baseColumns = [
-  column.accessor('name', { header: 'Name' }),
+  column.accessor('name', {
+    header: 'Name',
+    cell: (info) => <span className="font-medium">{info.getValue()}</span>,
+  }),
   column.accessor('description', {
     header: 'Description',
     sortFn: 'text',
-    cell: (info) => info.getValue() ?? '',
+    cell: (info) => (
+      <span className="block max-w-md truncate text-muted-foreground" title={info.getValue() ?? ''}>
+        {info.getValue() ?? ''}
+      </span>
+    ),
   }),
-  column.accessor('userCount', { header: 'Users', sortDescFirst: true }),
+  column.accessor('userCount', {
+    header: 'Users',
+    sortDescFirst: true,
+    cell: (info) => <span className="tabular-nums">{info.getValue()}</span>,
+  }),
 ];
 
 interface DepartmentActions {
@@ -43,15 +55,16 @@ function createColumns(actions: DepartmentActions | undefined) {
     ...baseColumns,
     column.display({
       id: 'actions',
-      header: 'Actions',
+      header: () => <span className="sr-only">Actions</span>,
       cell: (info) => (
-        <div className="flex gap-1">
-          <Button variant="outline" size="sm" onClick={() => actions.onEdit(info.row.original)}>
+        <div className="flex justify-end gap-1">
+          <Button variant="ghost" size="sm" onClick={() => actions.onEdit(info.row.original)}>
             Edit
           </Button>
           <Button
-            variant="destructive"
+            variant="ghost"
             size="sm"
+            className="text-destructive hover:bg-destructive/5 hover:text-destructive"
             onClick={() => actions.onDelete(info.row.original)}
           >
             Delete
@@ -102,14 +115,12 @@ export function DepartmentsTab() {
 
   return (
     <>
-      <div className="flex flex-wrap items-center gap-2">
-        <Input
-          type="search"
+      <div className="flex flex-wrap items-center gap-2 border-b p-3">
+        <SearchBox
           value={search}
           onChange={(event) => setSearch(event.target.value)}
           placeholder="Search departments"
           aria-label="Search departments"
-          className="max-w-sm"
         />
         {isAdmin && (
           <Button className="ml-auto" onClick={() => setDialog({ mode: 'create' })}>
@@ -120,12 +131,14 @@ export function DepartmentsTab() {
       </div>
 
       {departmentsQuery.isError && (
-        <QueryError
-          error={departmentsQuery.error}
-          onRetry={() => void departmentsQuery.refetch()}
-        />
+        <div className="p-3">
+          <QueryError
+            error={departmentsQuery.error}
+            onRetry={() => void departmentsQuery.refetch()}
+          />
+        </div>
       )}
-      {departmentsQuery.isPending && <p className="text-muted-foreground">Loading...</p>}
+      {departmentsQuery.isPending && <TableSkeleton />}
       {departmentsQuery.isSuccess && (
         <DataTable
           columns={createColumns(actions)}
@@ -133,6 +146,8 @@ export function DepartmentsTab() {
           sorting={sorting}
           onSortingChange={setSorting}
           emptyMessage="No departments match the search."
+          rightAlignedColumnIds={['userCount', 'actions']}
+          className="md:min-h-0 md:flex-1 md:overflow-auto"
         />
       )}
 

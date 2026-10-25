@@ -55,22 +55,32 @@ export function FileDropzone({
       onDrop={handleDrop}
       aria-invalid={isInvalid}
       className={cn(
-        'flex cursor-pointer flex-col items-center gap-1 rounded-lg border border-dashed p-6',
-        'text-center text-sm aria-invalid:border-destructive',
+        'flex cursor-pointer flex-col items-center gap-1 rounded-xl border border-dashed',
+        'border-input bg-muted px-6 py-7 text-center text-sm transition-colors duration-150',
+        'hover:border-primary hover:bg-selected aria-invalid:border-destructive',
         // The input is hidden, so the label shows the focus ring.
-        'focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50',
-        isDragOver && 'bg-muted',
+        'focus-within:border-primary focus-within:ring-3 focus-within:ring-ring/40',
+        isDragOver && 'border-primary bg-selected',
         disabled && 'cursor-not-allowed opacity-50',
       )}
     >
-      <UploadIcon className="size-5" />
+      <span
+        className={cn(
+          'mb-1.5 flex size-9 items-center justify-center rounded-full bg-card text-primary',
+          'shadow-[0_1px_2px_rgb(15_23_42/0.08)] ring-1 ring-border',
+        )}>
+        <UploadIcon className="size-4" />
+      </span>
       {file ? (
         <span className="font-medium">
-          {file.name} ({formatBytes(file.size)})
+          {file.name}{' '}
+          <span className="font-normal text-muted-foreground tabular-nums">
+            ({formatBytes(file.size)})
+          </span>
         </span>
       ) : (
         <>
-          <span>Drop a file here, or click to select a file</span>
+          <span className="font-medium">Drop a file here, or click to select a file</span>
           <span className="text-xs text-muted-foreground">
             {ALLOWED_EXTENSIONS.join(', ')}. Maximum 25 MB.
           </span>

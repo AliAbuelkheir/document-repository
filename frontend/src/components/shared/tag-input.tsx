@@ -1,5 +1,6 @@
 'use client';
 
+import { cn } from 'cn';
 import { PlusIcon, XIcon } from 'lucide-react';
 import { useState } from 'react';
 
@@ -47,10 +48,23 @@ export function TagInput({ value, onChange, isInvalid = false }: TagInputProps) 
   return (
     <div className="flex flex-wrap items-center gap-1.5">
       {value.map((tag) => (
-        <Badge key={tag} variant="secondary">
+        <Badge
+          key={tag}
+          variant="secondary"
+          className="h-8 gap-1 overflow-visible pr-1 pl-3 text-[13px] text-foreground"
+        >
           {tag}
-          <button type="button" aria-label={`Remove tag ${tag}`} onClick={() => removeTag(tag)}>
-            <XIcon className="size-3" />
+          <button
+            type="button"
+            aria-label={`Remove tag ${tag}`}
+            onClick={() => removeTag(tag)}
+            className={cn(
+              'relative flex size-6 items-center justify-center rounded-full text-muted-foreground',
+              'outline-none after:absolute after:-inset-1 hover:bg-accent hover:text-foreground',
+              'focus-visible:ring-2 focus-visible:ring-ring',
+            )}
+          >
+            <XIcon className="size-3.5" />
           </button>
         </Badge>
       ))}

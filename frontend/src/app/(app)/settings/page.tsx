@@ -4,7 +4,7 @@ import { Suspense } from 'react';
 import { SettingsView } from '@/components/settings/settings-view';
 
 export const metadata: Metadata = {
-  title: 'Settings - Document Repository',
+  title: 'Settings - EEMW Documents',
 };
 
 export default function SettingsPage() {
