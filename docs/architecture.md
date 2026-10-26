@@ -54,9 +54,8 @@ The health endpoint reports a degraded state if Redis fails and PostgreSQL remai
 
 This is a single-host POC, not a measured production deployment.
 Shared object storage, search indexes, and load measurements are next steps for scale.
-The migration currently lacks dedicated indexes for document title, description, owner, and latest
-filename.
-The presence of `pg_trgm` alone does not create those indexes.
+A GIN trigram index supports document title search. An owner ID index supports the uploader filter.
+Description and filename search still lack dedicated indexes.
 
 ## Database relations
 

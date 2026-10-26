@@ -111,6 +111,8 @@ model Document {
   permissions    DocumentPermission[]
 
   @@index([tags], type: Gin)
+  @@index([title(ops: raw("gin_trgm_ops"))], type: Gin, map: "documents_title_trgm_idx")
+  @@index([ownerId])
   @@map("documents")
 }
 
